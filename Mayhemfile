@@ -1,0 +1,5 @@
+project: p7zip
+target: 7z
+
+cmds:
+  - cmd: /7z e @@
