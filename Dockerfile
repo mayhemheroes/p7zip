@@ -1,23 +1,27 @@
 # Build Stage
-FROM --platform=linux/amd64 ubuntu:20.04 as builder
+FROM --platform=linux/amd64 ubuntu:20.04 AS builder
 
 ## Install build dependencies.
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y cmake
-
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y g++
+    DEBIAN_FRONTEND=noninteractive apt-get install -y make g++
 
 ## Add source code to the build stage.
 ADD . /p7zip
 WORKDIR /p7zip
 
-## TODO: ADD YOUR BUILD INSTRUCTIONS HERE.
-RUN make 7z
+## Build the standalone 7zz binary (produces _o/7zz)
+RUN cd CPP/7zip/Bundles/Alone2 && make -f makefile.gcc
 
-#Package Stage
+## Build the 7z.so format plugin (produces _o/lib/7z.so)
+RUN cd CPP/7zip/Bundles/Format7zF && make -f makefile.gcc
+
+## Collect outputs into bin/
+RUN mkdir -p bin && \
+    cp CPP/7zip/Bundles/Alone2/_o/7zz bin/7z && \
+    cp CPP/7zip/Bundles/Format7zF/_o/lib/7z.so bin/7z.so
+
+# Package Stage
 FROM --platform=linux/amd64 ubuntu:20.04
 
-## TODO: Change <Path in Builder Stage>
 COPY --from=builder /p7zip/bin/7z /
 COPY --from=builder /p7zip/bin/7z.so /
