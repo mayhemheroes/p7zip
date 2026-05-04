@@ -1,9 +1,9 @@
 # Build Stage
-FROM --platform=linux/amd64 ubuntu:20.04 AS builder
+FROM --platform=linux/amd64 ubuntu:22.04 AS builder
 
 ## Install build dependencies.
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y make g++
+    DEBIAN_FRONTEND=noninteractive apt-get install -y make g++ cmake patchelf
 
 ## Add source code to the build stage.
 ADD . /p7zip
@@ -21,7 +21,7 @@ RUN mkdir -p bin && \
     cp CPP/7zip/Bundles/Format7zF/_o/lib/7z.so bin/7z.so
 
 # Package Stage
-FROM --platform=linux/amd64 ubuntu:20.04
+FROM --platform=linux/amd64 ubuntu:22.04
 
 COPY --from=builder /p7zip/bin/7z /
 COPY --from=builder /p7zip/bin/7z.so /
